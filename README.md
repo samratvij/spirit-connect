@@ -36,7 +36,7 @@ The mobile app is your interface. The laptop is your brain.
 After every conversation turn, the LLM automatically extracts a condensed set of facts and stores them in a local SQLite database. Memories are **isolated per persona**; the 'Assistant' persona has different memories than the 'Spirit' persona, ensuring contextually relevant assistance.
 
 ### 🖼️ Multimodal Support
-Attach **images** and **text files** directly to your messages. Spirit Connect can process visuals (using vision-capable models like `qwen2-vl` or `llava`) and extract text from documents to include in the conversation context.
+Attach **images** and **text files** directly to your messages. Spirit Connect can process visuals (using vision-capable models like `qwen3.5` or `llava`) and extract text from documents to include in the conversation context.
 
 ### ⏹️ Interactive & Resilient Streaming
 - **Stop Button**: Interrupt the LLM mid-sentence if the response isn't what you need.
@@ -57,7 +57,7 @@ A clean, fast Flutter app for iOS and Android. Supports:
 - Settings panel (server URL, API key)
 
 ### ⚡ Powerful LLM Backend
-Supports any model available in Ollama. Recommended: **qwen2.5:35b** or **qwen2-vl** for multimodal support.
+Supports any model available in Ollama. Recommended: **qwen3.5:35b** or **qwen2-vl** for multimodal support.
 
 ---
 

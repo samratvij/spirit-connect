@@ -438,7 +438,7 @@ On first launch:
 | Feature | Approach |
 |---------|---------|
 | Semantic memory search | Add `chromadb` vector store; embed memories with `nomic-embed-text` via Ollama |
-| Smaller memory extraction model | Use `qwen2.5:3b` or `llama3.2:3b` for extraction to reduce latency |
+| Smaller memory extraction model | Use `qwen3.5:3b` or `llama3.2:3b` for extraction to reduce latency |
 | Memory categories / tags | Add `category` field to DB; filter injection by relevance |
 | Voice input | Integrate `whisper` (via Ollama or standalone) on the server; push-to-talk in app |
 | Conversation history persistence | Store full chat logs in DB; allow browsing past conversations |
