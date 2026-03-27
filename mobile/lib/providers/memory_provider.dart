@@ -70,7 +70,7 @@ class MemoryNotifier extends StateNotifier<MemoryState> {
     try {
       final updated = await apiService.updateMemory(id, content);
       state = state.copyWith(
-        memories: state.memories.map((m) => m.id == id ? updated : m).toList(),
+        memories: state.memories.map<MemoryRecord>((m) => m.id == id ? updated : m).toList(),
       );
     } catch (e) {
       state = state.copyWith(

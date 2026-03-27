@@ -32,8 +32,16 @@ The mobile app is your interface. The laptop is your brain.
 
 ## Key Features
 
-### 🧠 Persistent Memory
-After every conversation turn, the LLM automatically extracts a condensed set of facts and stores them in a local SQLite database. On every subsequent message, all stored memories are injected into the model's context window, giving you a continuously learning personal assistant.
+### 🧠 Persistent & Isolated Memory
+After every conversation turn, the LLM automatically extracts a condensed set of facts and stores them in a local SQLite database. Memories are **isolated per persona**; the 'Assistant' persona has different memories than the 'Spirit' persona, ensuring contextually relevant assistance.
+
+### 🖼️ Multimodal Support
+Attach **images** and **text files** directly to your messages. Spirit Connect can process visuals (using vision-capable models like `qwen2-vl` or `llava`) and extract text from documents to include in the conversation context.
+
+### ⏹️ Interactive & Resilient Streaming
+- **Stop Button**: Interrupt the LLM mid-sentence if the response isn't what you need.
+- **Background Persistence**: The server continues saving responses even if your phone locks.
+- **Auto-Sync**: The app automatically re-syncs your conversation history whenever you return from the background.
 
 ### 🔒 Private & Secure
 - All inference is handled by **Ollama** running locally — no API calls to OpenAI, Anthropic, or any cloud
@@ -43,12 +51,13 @@ After every conversation turn, the LLM automatically extracts a condensed set of
 
 ### 📱 Mobile-First Interface
 A clean, fast Flutter app for iOS and Android. Supports:
-- Conversational chat UI
-- Memory browser (view, edit, delete stored memories)
+- Conversational chat UI with smooth token streaming
+- Sidebar chat history with deletion support
+- Memory browser (view, edit, delete stored memories by persona)
 - Settings panel (server URL, API key)
 
 ### ⚡ Powerful LLM Backend
-Uses **qwen3:35b via Ollama** — a high-quality open-source model that runs fully on-device (Apple Silicon or NVIDIA GPU recommended).
+Supports any model available in Ollama. Recommended: **qwen2.5:35b** or **qwen2-vl** for multimodal support.
 
 ---
 

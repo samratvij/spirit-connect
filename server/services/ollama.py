@@ -16,15 +16,25 @@ from config import settings
 OLLAMA_CHAT_PATH = "/api/chat"
 
 
-async def stream_chat(messages: list[dict]) -> AsyncGenerator[str, None]:
+async def stream_chat(messages: list[dict], model: str | None = None) -> AsyncGenerator[str, None]:
     """
     Stream a chat completion from Ollama.
 
     Yields decoded text delta strings as they arrive.
     """
+    chosen_model = model or settings.ollama_chat_model
+    # Clean messages to remove None fields (like images: None) and empty images lists
+    cleaned_messages = []
+    for m in messages:
+        clean_m = {k: v for k, v in m.items() if v is not None}
+        # If images is an empty list, remove it to be safe
+        if "images" in clean_m and not clean_m["images"]:
+            del clean_m["images"]
+        cleaned_messages.append(clean_m)
+
     payload = {
-        "model": settings.ollama_chat_model,
-        "messages": messages,
+        "model": chosen_model,
+        "messages": cleaned_messages,
         "stream": True,
         "think": False,
     }
@@ -71,3 +81,22 @@ async def complete(messages: list[dict], model: str | None = None) -> str:
         response.raise_for_status()
         data = response.json()
         return data.get("message", {}).get("content", "")
+
+
+async def embed(text: str) -> list[float]:
+    """
+    Generate a vector embedding for the given text using Ollama.
+    """
+    payload = {
+        "model": settings.ollama_embedding_model,
+        "input": text, # /api/embed uses "input", /api/embeddings uses "prompt"
+    }
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            f"{settings.ollama_base_url}/api/embed",
+            json=payload,
+        )
+        response.raise_for_status()
+        data = response.json()
+        return data.get("embeddings", [[]])[0] # /api/embed returns {"embeddings": [[...]]}

@@ -13,6 +13,7 @@ from database import init_db
 from middleware.auth import BearerTokenMiddleware
 from routes.chat import router as chat_router
 from routes.memory import router as memory_router
+from routes.conversations import router as conversations_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,6 +53,7 @@ app.add_middleware(
 # Routes
 app.include_router(chat_router)
 app.include_router(memory_router)
+app.include_router(conversations_router)
 
 
 @app.get("/health", tags=["system"])

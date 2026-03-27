@@ -5,37 +5,16 @@ import 'package:intl/intl.dart';
 
 import '../providers/memory_provider.dart';
 
-class MemoryScreen extends ConsumerStatefulWidget {
+import '../providers/persona_provider.dart';
+import 'persona_memory_screen.dart';
+
+class MemoryScreen extends ConsumerWidget {
   const MemoryScreen({super.key});
 
   @override
-  ConsumerState<MemoryScreen> createState() => _MemoryScreenState();
-}
-
-class _MemoryScreenState extends ConsumerState<MemoryScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(memoryProvider.notifier).load();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(memoryProvider);
-
-    ref.listen<MemoryState>(memoryProvider, (prev, next) {
-      if (next.error != null && next.error != prev?.error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error!),
-            backgroundColor: Colors.red.shade800,
-          ),
-        );
-        ref.read(memoryProvider.notifier).clearError();
-      }
-    });
+  Widget build(BuildContext context, WidgetRef ref) {
+    final personas = ref.watch(personasProvider);
+    final memories = ref.watch(memoryProvider).memories;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0E1117),
@@ -48,99 +27,76 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
             color: Colors.white,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF8B949E)),
-            onPressed: () => ref.read(memoryProvider.notifier).load(),
-          ),
-        ],
       ),
-      body: Builder(
-        builder: (_) {
-          if (state.status == MemoryStatus.loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6366F1)),
-            );
-          }
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: personas.length,
+        itemBuilder: (context, index) {
+          final persona = personas[index];
+          final personaMemories = memories.where((m) => m.personaId == persona.modelName).toList();
 
-          if (state.memories.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.memory_outlined, size: 56, color: Color(0xFF30363D)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No memories yet',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF8B949E),
-                    ),
+          return Card(
+            color: const Color(0xFF161B22),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: const BorderSide(color: Color(0xFF30363D)),
+            ),
+            margin: const EdgeInsets.only(bottom: 16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PersonaMemoryScreen(persona: persona),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Start chatting — Spirit will\nlearn from your conversations.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: const Color(0xFF484F58),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.memories.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (ctx, i) {
-              final memory = state.memories[i];
-              return _MemoryTile(
-                content: memory.content,
-                date: memory.updatedAt,
-                onDelete: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      backgroundColor: const Color(0xFF161B22),
-                      title: const Text('Delete memory?',
-                          style: TextStyle(color: Colors.white)),
-                      content: Text(
-                        '"${memory.content}"',
-                        style: const TextStyle(
-                            color: Color(0xFF8B949E), fontStyle: FontStyle.italic),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0E1117),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF30363D)),
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Delete',
-                              style: TextStyle(color: Colors.redAccent)),
-                        ),
-                      ],
+                      child: Center(
+                        child: Text(persona.icon, style: const TextStyle(fontSize: 32)),
+                      ),
                     ),
-                  );
-                  if (confirm == true) {
-                    ref.read(memoryProvider.notifier).delete(memory.id);
-                  }
-                },
-                onEdit: () async {
-                  final edited = await showDialog<String>(
-                    context: context,
-                    builder: (_) => _EditMemoryDialog(initial: memory.content),
-                  );
-                  if (edited != null && edited.trim().isNotEmpty) {
-                    ref.read(memoryProvider.notifier).update(memory.id, edited.trim());
-                  }
-                },
-              );
-            },
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            persona.name,
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${personaMemories.length} memories stored',
+                            style: GoogleFonts.inter(
+                              fontSize: 13,
+                              color: const Color(0xFF8B949E),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.chevron_right, color: Color(0xFF484F58)),
+                  ],
+                ),
+              ),
+            ),
           );
         },
       ),

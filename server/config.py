@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     # Memory
     max_memory_tokens: int = 2000
+    ollama_embedding_model: str = "nomic-embed-text" # Balanced performance/size
 
 
 settings = Settings()

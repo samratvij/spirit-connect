@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'screens/chat_screen.dart';
+import 'screens/history_screen.dart';
 import 'screens/memory_screen.dart';
 import 'screens/settings_screen.dart';
+import 'providers/persona_provider.dart';
 
 void main() {
   runApp(const ProviderScope(child: SpiritConnectApp()));
@@ -49,15 +51,8 @@ class SpiritConnectApp extends StatelessWidget {
   }
 }
 
-class _MainShell extends StatefulWidget {
+class _MainShell extends ConsumerWidget {
   const _MainShell();
-
-  @override
-  State<_MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<_MainShell> {
-  int _currentIndex = 0;
 
   static const _screens = [
     ChatScreen(),
@@ -66,10 +61,17 @@ class _MainShellState extends State<_MainShell> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    var currentIndex = ref.watch(selectedTabProvider);
+    // Adjust index because we removed History (index 0)
+    // If History was selected, default to Chat
+    if (currentIndex == 0) currentIndex = 1;
+    // UI expects 0, 1, 2 for the 3 screens left
+    final adjustedIndex = currentIndex - 1;
+
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex,
+        index: adjustedIndex,
         children: _screens,
       ),
       bottomNavigationBar: Container(
@@ -79,8 +81,8 @@ class _MainShellState extends State<_MainShell> {
         child: NavigationBar(
           backgroundColor: const Color(0xFF161B22),
           indicatorColor: const Color(0xFF6366F1).withValues(alpha:0.2),
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (i) => setState(() => _currentIndex = i),
+          selectedIndex: adjustedIndex,
+          onDestinationSelected: (i) => ref.read(selectedTabProvider.notifier).state = i + 1,
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
           destinations: const [
             NavigationDestination(

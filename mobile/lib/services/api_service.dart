@@ -70,12 +70,22 @@ class ApiService {
 
   /// Streams token deltas from /chat.
   /// Yields each delta string as it arrives.
-  Stream<String> streamChat(List<ChatMessage> messages) async* {
+  Stream<String> streamChat(
+    List<ChatMessage> messages, {
+    String? model,
+    int? conversationId,
+    CancelToken? cancelToken,
+  }) async* {
     final client = await _client();
 
     final response = await client.post<ResponseBody>(
       '/chat',
-      data: {'messages': messages.map((m) => m.toJson()).toList()},
+      data: {
+        'messages': messages.map((m) => m.toJson()).toList(),
+        'model': model,
+        'conversation_id': conversationId,
+      },
+      cancelToken: cancelToken,
       options: Options(
         responseType: ResponseType.stream,
         headers: {'Accept': 'text/event-stream'},
@@ -105,6 +115,31 @@ class ApiService {
         }
       }
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Conversations & History
+  // -------------------------------------------------------------------------
+
+  Future<List<dynamic>> getConversations() async {
+    final client = await _client();
+    final response = await client.get<List>('/conversations');
+    return response.data ?? [];
+  }
+
+  Future<Map<String, dynamic>> createConversation(String personaId, String? title) async {
+    final client = await _client();
+    final response = await client.post<Map<String, dynamic>>(
+      '/conversations',
+      data: {'persona_id': personaId, 'title': title},
+    );
+    return response.data!;
+  }
+
+  Future<List<dynamic>> getConversationMessages(int id) async {
+    final client = await _client();
+    final response = await client.get<List>('/conversations/$id/messages');
+    return response.data ?? [];
   }
 
   // -------------------------------------------------------------------------
@@ -140,6 +175,11 @@ class ApiService {
   Future<void> deleteMemory(int id) async {
     final client = await _client();
     await client.delete('/memory/$id');
+  }
+
+  Future<void> deleteConversation(int id) async {
+    final client = await _client();
+    await client.delete('/conversations/$id');
   }
 }
 
