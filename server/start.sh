@@ -20,5 +20,5 @@ fi
 echo "📦  Syncing dependencies..."
 uv sync --no-install-project
 
-echo "🚀  Starting Spirit Connect server on port 8000..."
-uv run --no-project uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+echo "🚀  Starting Spirit Connect server..."
+uv run --no-project python main.py

@@ -59,3 +59,14 @@ app.include_router(conversations_router)
 @app.get("/health", tags=["system"])
 async def health():
     return {"status": "ok", "service": "spirit-connect"}
+
+if __name__ == "__main__":
+    import uvicorn
+    from config import settings
+    
+    uvicorn.run(
+        "main:app",
+        host=settings.app_host,
+        port=settings.app_port,
+        reload=True
+    )

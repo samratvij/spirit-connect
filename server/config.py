@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     ollama_chat_model: str
     ollama_memory_model: str
 
+    # Server
+    app_host: str = "0.0.0.0"
+    app_port: int = 8000
+
     # Auth
     api_secret_key: str
 
