@@ -14,7 +14,13 @@ class MemoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final personas = ref.watch(personasProvider);
-    final memories = ref.watch(memoryProvider).memories;
+    final memoryState = ref.watch(memoryProvider);
+    final memories = memoryState.memories;
+
+    // Trigger load if idle
+    if (memoryState.status == MemoryStatus.idle) {
+      Future.microtask(() => ref.read(memoryProvider.notifier).load());
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF0E1117),
@@ -28,77 +34,82 @@ class MemoryScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: personas.length,
-        itemBuilder: (context, index) {
-          final persona = personas[index];
-          final personaMemories = memories.where((m) => m.personaId == persona.modelName).toList();
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(memoryProvider.notifier).load(),
+        color: const Color(0xFF6366F1),
+        backgroundColor: const Color(0xFF161B22),
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: personas.length,
+          itemBuilder: (context, index) {
+            final persona = personas[index];
+            final personaMemories = memories.where((m) => m.personaId == persona.modelName).toList();
 
-          return Card(
-            color: const Color(0xFF161B22),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: Color(0xFF30363D)),
-            ),
-            margin: const EdgeInsets.only(bottom: 16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PersonaMemoryScreen(persona: persona),
+            return Card(
+              color: const Color(0xFF161B22),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Color(0xFF30363D)),
+              ),
+              margin: const EdgeInsets.only(bottom: 16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PersonaMemoryScreen(persona: persona),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0E1117),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFF30363D)),
+                        ),
+                        child: Center(
+                          child: Text(persona.icon, style: const TextStyle(fontSize: 32)),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              persona.name,
+                              style: GoogleFonts.inter(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${personaMemories.length} memories stored',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                color: const Color(0xFF8B949E),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, color: Color(0xFF484F58)),
+                    ],
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0E1117),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF30363D)),
-                      ),
-                      child: Center(
-                        child: Text(persona.icon, style: const TextStyle(fontSize: 32)),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            persona.name,
-                            style: GoogleFonts.inter(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${personaMemories.length} memories stored',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              color: const Color(0xFF8B949E),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.chevron_right, color: Color(0xFF484F58)),
-                  ],
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

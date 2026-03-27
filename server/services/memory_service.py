@@ -97,13 +97,13 @@ async def build_system_prompt(db: AsyncSession, persona_id: str, query: str | No
 # CRUD
 # ---------------------------------------------------------------------------
 
-async def get_all_memories(db: AsyncSession, persona_id: str) -> list[Memory]:
-    """Return all memories for the given persona, most recently used / updated first."""
-    result = await db.execute(
-        select(Memory)
-        .where(Memory.persona_id == persona_id)
-        .order_by(Memory.last_used.desc().nullslast(), Memory.updated_at.desc())
-    )
+async def get_all_memories(db: AsyncSession, persona_id: str | None = None) -> list[Memory]:
+    """Return memories, optionally filtered by persona, most recently used / updated first."""
+    stmt = select(Memory).order_by(Memory.last_used.desc().nullslast(), Memory.updated_at.desc())
+    if persona_id:
+        stmt = stmt.where(Memory.persona_id == persona_id)
+    
+    result = await db.execute(stmt)
     return list(result.scalars().all())
 
 

@@ -9,6 +9,7 @@ class MemoryRecord(BaseModel):
     created_at: datetime
     updated_at: datetime
     last_used: datetime | None
+    persona_id: str
 
     model_config = {"from_attributes": True}
 
