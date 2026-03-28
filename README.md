@@ -172,7 +172,3 @@ Spirit Connect is built on a simple principle: **you own your data**.
 - Fully open-source
 
 ---
-
-## License
-
-MIT License — see `LICENSE` for details.
