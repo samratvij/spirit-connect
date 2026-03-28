@@ -154,7 +154,7 @@ spirit-connect/
 > ⚠️ Full setup instructions will be in `docs/TSD.md`
 
 **Quick overview:**
-1. Install Ollama and pull the model: `ollama pull qwen3:35b`  *(model name TBD)*
+1. Install Ollama and pull the model: `ollama pull qwen3.5:35b`
 2. Install Python dependencies and start the server: `uvicorn main:app`
 3. Install the Flutter app on your phone
 4. Connect both devices to the same Tailscale network
